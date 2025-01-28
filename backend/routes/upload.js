@@ -1,7 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
+
+// Configuración de multer con más opciones
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB max file size
+    },
+    fileFilter: function (req, file, cb) {
+        // Verificar tipo de archivo
+        if (file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || 
+            file.mimetype === "application/vnd.ms-excel") {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos Excel (.xlsx, .xls)'), false);
+        }
+    }
+});
+
 const {
     authenticate,
     informarGuiaDespacho,
@@ -18,14 +35,43 @@ const { procesarArchivoEntrega } = require('../functions/FechaEntrega');
 router.post('/uploadGuiaDespacho', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({ error: 'No se ha subido ningún archivo' });
+            return res.status(400).json({ error: 'No se ha subido ningún archivo.' });
         }
 
-        const despachos = await generarDespachos(req.file.buffer);
-        res.json({ despachos });
+        const token = await authenticate();
+        console.log('Token obtenido:', token);
+        
+        const buffer = req.file.buffer;
+        const distribuciones = await generarDespachos(buffer);
+        console.log('Distribuciones a procesar:', distribuciones.length);
+        
+        const resultados = [];
+        for (const distribucion of distribuciones) {
+            try {
+                await informarGuiaDespacho(distribucion, token);
+                resultados.push({
+                    ...distribucion,
+                    mensaje: 'Procesado exitosamente'
+                });
+            } catch (error) {
+                resultados.push({
+                    ...distribucion,
+                    mensaje: error.message || 'Error desconocido'
+                });
+            }
+        }
+
+        res.json({
+            despachos: resultados,
+            status: resultados.some(r => r.mensaje !== 'Procesado exitosamente') ? 'warning' : 'success'
+        });
+
     } catch (error) {
-        console.error('Error en /uploadGuiaDespacho:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error al procesar el archivo:', error);
+        res.status(500).json({ 
+            error: 'Error al procesar el archivo',
+            message: error.message 
+        });
     }
 });
 
@@ -33,14 +79,39 @@ router.post('/uploadGuiaDespacho', upload.single('file'), async (req, res) => {
 router.post('/uploadEntrega', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({ error: 'No se ha subido ningún archivo' });
+            return res.status(400).json({ message: 'No se ha subido ningún archivo' });
         }
 
-        const despachos = await procesarArchivoEntrega(req.file.buffer);
-        res.json({ despachos });
+        const token = await authenticate();
+        const entregas = await procesarArchivoEntrega(req.file.buffer);
+        const resultados = [];
+
+        for (const entrega of entregas) {
+            try {
+                await informarFechaEntrega(entrega, token);
+                resultados.push({
+                    ...entrega,
+                    mensaje: 'Procesado exitosamente'
+                });
+            } catch (error) {
+                resultados.push({
+                    ...entrega,
+                    mensaje: error.message || 'Error al procesar la entrega'
+                });
+            }
+        }
+
+        res.json({ 
+            despachos: resultados,
+            status: resultados.some(r => r.mensaje !== 'Procesado exitosamente') ? 'warning' : 'success'
+        });
+
     } catch (error) {
-        console.error('Error en /uploadEntrega:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error al procesar el archivo:', error);
+        res.status(500).json({ 
+            error: 'Error al procesar el archivo',
+            message: error.message 
+        });
     }
 });
 
@@ -48,14 +119,41 @@ router.post('/uploadEntrega', upload.single('file'), async (req, res) => {
 router.post('/uploadInvoice', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({ error: 'No se ha subido ningún archivo' });
+            return res.status(400).json({ error: 'No se ha subido ningún archivo.' });
         }
 
-        const despachos = await readInvoiceFile(req.file.buffer);
-        res.json({ despachos });
+        const token = await authenticate();
+        const facturas = await readInvoiceFile(req.file.buffer);
+        const resultados = [];
+
+        for (const factura of facturas) {
+            try {
+                const detalles = await obtenerDetallesDocumento(factura.Doc_Cenabast, token);
+                await actualizarInfoFacturacion(factura, token);
+                resultados.push({
+                    ...factura,
+                    ...detalles,
+                    mensaje: 'Procesado exitosamente'
+                });
+            } catch (error) {
+                resultados.push({
+                    ...factura,
+                    mensaje: error.message || 'Error al procesar la factura'
+                });
+            }
+        }
+
+        res.json({
+            despachos: resultados,
+            status: resultados.some(r => r.mensaje !== 'Procesado exitosamente') ? 'warning' : 'success'
+        });
+
     } catch (error) {
-        console.error('Error en /uploadInvoice:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error al procesar el archivo:', error);
+        res.status(500).json({ 
+            error: 'Error al procesar el archivo',
+            message: error.message 
+        });
     }
 });
 
@@ -70,23 +168,24 @@ router.post('/uploadDocument', async (req, res) => {
             });
         }
 
-        // Obtener token de autenticación
-        const authResponse = await authenticate();
-        if (!authResponse || !authResponse.Token) {
-            throw new Error('No se pudo obtener el token de autenticación');
-        }
-
-        // Subir el documento
+        const token = await authenticate();
         const response = await subirDocumento({
             Doc_Cenabast: docCenabast,
             Rut_Proveedor: rutProveedor,
             Documento: documento
-        }, authResponse.Token);
+        }, token);
 
-        res.json({ success: true, data: response.data });
+        res.json({
+            success: true,
+            data: response
+        });
+
     } catch (error) {
-        console.error('Error en /uploadDocument:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error al subir documento:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 });
 

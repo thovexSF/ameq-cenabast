@@ -36,4 +36,4 @@ RUN cd backend && \
 EXPOSE 3002
 
 # Comando para iniciar
-CMD cd backend && npm start 
+CMD cd backend && npm start
