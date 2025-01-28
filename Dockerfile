@@ -5,6 +5,7 @@ WORKDIR /app/frontend
 
 # Copiar e instalar dependencias del frontend
 COPY frontend/package*.json ./
+RUN apk update && apk add npm
 RUN npm install
 
 # Copiar y construir el frontend
