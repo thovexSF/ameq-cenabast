@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "concurrently": "^6.2.0"
-  }
+  },
   "engines": {
     "node": ">=19.0.0"
   },

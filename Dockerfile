@@ -26,7 +26,7 @@ WORKDIR /app/backend
 COPY backend/package*.json ./
 
 # Instalar dependencias del backend
-RUN npm install --omit=dev
+RUN npm install 
 
 # Copiar el resto del código del backend
 COPY backend/ ./
