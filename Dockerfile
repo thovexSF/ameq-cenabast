@@ -1,5 +1,5 @@
 # Etapa de construcción del frontend
-FROM node:18 as builder
+FROM node:18-alpine as builder
 
 # Configurar directorio de trabajo
 WORKDIR /usr/src/app
@@ -25,7 +25,7 @@ COPY . .
 RUN cd frontend && npm run build
 
 # Etapa final
-FROM node-18
+FROM node-18-alpine
 
 WORKDIR /usr/src/app
 
