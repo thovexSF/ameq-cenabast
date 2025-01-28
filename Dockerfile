@@ -2,22 +2,23 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copiar archivos de configuración
-COPY package*.json ./
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
-
-# Instalar dependencias del backend
-RUN cd backend && npm install --omit=dev
-
-# Instalar dependencias y construir el frontend
-RUN cd frontend && npm install && npm run build
-
-# Copiar el código fuente
+# Copiar todo el código fuente primero
 COPY . .
 
+# Instalar dependencias y construir frontend
+RUN cd frontend && \
+    npm install && \
+    npm run build && \
+    cd ..
+
+# Instalar dependencias del backend
+RUN cd backend && \
+    npm install --omit=dev && \
+    cd ..
+
 # Mover los archivos construidos del frontend al backend
-RUN mkdir -p backend/public && cp -r frontend/build/* backend/public/
+RUN mkdir -p backend/public && \
+    cp -r frontend/build/* backend/public/
 
 # Puerto
 EXPOSE 3002
