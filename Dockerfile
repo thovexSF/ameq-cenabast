@@ -1,7 +1,7 @@
 # Etapa de construcción del frontend
 FROM node:18-alpine as frontend-builder
 
-WORKDIR /app/frontend
+WORKDIR /src/app/frontend
 
 # Copiar y verificar package.json
 COPY frontend/package*.json ./
@@ -14,7 +14,7 @@ RUN npm run build
 # Etapa de construcción del backend
 FROM node:18-alpine as backend-builder
 
-WORKDIR /app
+WORKDIR /src/app/backend
 
 # Copiar y verificar package.json
 COPY backend/package*.json ./
