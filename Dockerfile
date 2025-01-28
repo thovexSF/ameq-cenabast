@@ -2,7 +2,7 @@
 FROM node:18 as builder
 
 # Configurar directorio de trabajo
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # Copiar package.json de ambos proyectos
 COPY package.json package-lock.json ./
@@ -27,7 +27,7 @@ RUN cd frontend && npm run build
 # Etapa final
 FROM node-18
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # Copiar package.json e instalar dependencias de producción
 COPY backend/package*.json ./
