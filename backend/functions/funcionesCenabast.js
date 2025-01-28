@@ -1,23 +1,31 @@
 const axios = require('axios');
+require('dotenv').config();
+
+// Obtener la URL base según el ambiente
+const BASEURL = process.env.NODE_ENV === 'production' 
+    ? process.env.CENABAST_PRODUCTION_BASEURL 
+    : process.env.CENABAST_DEVELOPMENT_BASEURL;
+
 // Función para autenticar y obtener el token
 async function authenticate() {
     try {
-        const response = await axios.post('https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/login/authenticate', {
-            Username: "76209836",
-            Password: "k3IdtG3lBMck`&lt;]"
+        const response = await axios.post(`${BASEURL}/login/authenticate`, {
+            Username: process.env.CENABAST_USERNAME,
+            Password: process.env.CENABAST_PASSWORD
         });
         console.log('Token obtenido:', response.data);
-        return response.data; // Asumiendo que el token está en response.data.token
+        return response.data;
     } catch (error) {
         console.error('Error autenticando:', error);
         throw error;
     }
 }
+
 // Función para informar el detalle de la guía de despacho
 async function informarGuiaDespacho(detalleGuia, token) {
     try {
         console.log('Datos enviados:', JSON.stringify(detalleGuia, null, 2));
-        const response = await axios.post('https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/proveedor/distribucion', detalleGuia, {
+        const response = await axios.post(`${BASEURL}/proveedor/distribucion`, detalleGuia, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -41,7 +49,7 @@ async function informarGuiaDespacho(detalleGuia, token) {
 // Función para verificar movimientos existentes
 async function verificarMovimientosExistentes(docCenabast) {
     try {
-        const response = await axios.get(`https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/public/distribucion/${docCenabast}/movimiento`);
+        const response = await axios.get(`${BASEURL}/public/distribucion/${docCenabast}/movimiento`);
         
         // Verificar si no hay movimientos
         if (!response.data || response.data.length === 0) {
@@ -85,7 +93,7 @@ async function informarFechaEntrega(docCenabast, movimiento, token) {
         // Si la verificación fue exitosa, procedemos con el POST
         try {
             const response = await axios.post(
-                `https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/proveedor/distribucion/${docCenabast}/movimiento`,
+                `${BASEURL}/proveedor/distribucion/${docCenabast}/movimiento`,
                 movimiento,
                 {
                     headers: {
@@ -104,11 +112,12 @@ async function informarFechaEntrega(docCenabast, movimiento, token) {
         throw error;
     }
 }
+
 // Función para actualizar la fecha de facturación
 async function actualizarInfoFacturacion(docCenabast, factura, token) {
     try {
         const response = await axios.put(
-            `https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/proveedor/distribucion/${docCenabast}`, 
+            `${BASEURL}/proveedor/distribucion/${docCenabast}`, 
             factura,  // Enviamos el objeto factura completo
             {
                 headers: {
@@ -128,7 +137,7 @@ async function actualizarInfoFacturacion(docCenabast, factura, token) {
 // Función para subir un documento en base64
 async function subirDocumento(payload, token) {
     const response = await axios.post(
-        'https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/proveedor/cedible',
+        `${BASEURL}/proveedor/cedible`,
         {
             Doc_Cenabast: payload.Doc_Cenabast,
             Rut_Proveedor: payload.Rut_Proveedor,
@@ -148,7 +157,7 @@ async function subirDocumento(payload, token) {
 // Función para obtener detalles del documento desde la API de Cenabast
 async function obtenerDetallesDocumento(docCenabast, token) {
     try {
-        const response = await axios.get(`https://testaplicacionesweb.cenabast.cl:7001/WebApi/api/v1/public/distribucion/${docCenabast}`, {
+        const response = await axios.get(`${BASEURL}/public/distribucion/${docCenabast}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
