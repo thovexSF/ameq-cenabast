@@ -7,7 +7,6 @@ const { generarDespachos } = require('./functions/guiasDespacho');
 const { readInvoiceFile } = require('./functions/Facturas');  
 const { procesarArchivoEntrega } = require('./functions/FechaEntrega');
 const uploadRoutes = require('./routes/upload');
-const path = require('path');
 
 const app = express();
 
@@ -254,14 +253,14 @@ app.post('/uploadDocument', async (req, res) => {
     }
 });
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Importante: Esta ruta debe ir DESPUÉS de tus rutas de API
-// Maneja cualquier solicitud que no sea de API redirigiendo al frontend
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Servir archivos estáticos en producción
+if (config.NODE_ENV === 'production') {
+    const path = require('path');
+    app.use(express.static(path.join(__dirname, 'frontend/build')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+    });
+}
 
 // Manejo de errores de multer
 app.use((err, req, res, next) => {
@@ -290,9 +289,8 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar servidor
-const port = process.env.PORT || 3002;
-app.listen(port, () => {
-    console.log(`Servidor corriendo en el puerto ${port}`);
+app.listen(config.PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${config.PORT}`);
     console.log(`Ambiente: ${config.NODE_ENV}`);
     console.log(`URL Cenabast: ${config.CENABAST_BASE_URL}`);
 });
