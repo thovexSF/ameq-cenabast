@@ -2,42 +2,41 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Instalar dependencias necesarias para el build
+RUN apk add --no-cache python3 make g++
+
 # Crear directorios necesarios
 RUN mkdir -p frontend backend
 
-# Copiar package.json primero para aprovechar el caché de Docker
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
-COPY backend/package*.json ./backend/
-
 # Configurar y construir el frontend
 WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
 COPY frontend .
-RUN npm install && \
-    echo "Iniciando build del frontend..." && \
-    ls -la && \
-    npm run build && \
+RUN echo "Iniciando build del frontend..." && \
+    NODE_ENV=production CI=false npm run build && \
     echo "Build del frontend completado" && \
     ls -la build/
 
 # Configurar el backend
 WORKDIR /app/backend
-COPY backend .
+COPY backend/package*.json ./
 RUN npm install --omit=dev
+COPY backend .
 
 # Crear directorio public y copiar el build
 RUN mkdir -p public && \
     echo "Copiando archivos del frontend..." && \
-    ls -la ../frontend/build/ && \
     cp -r ../frontend/build/* public/ && \
     echo "Archivos copiados correctamente" && \
     ls -la public/
 
 # Volver al directorio raíz
 WORKDIR /app
+COPY package*.json ./
 
 # Puerto
 EXPOSE 3002
 
 # Comando para iniciar
-CMD ["npm", "start"] 
+CMD cd backend && npm start 
