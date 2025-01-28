@@ -5,7 +5,7 @@ WORKDIR /src/app/frontend
 
 # Copiar y verificar package.json
 COPY frontend/package*.json ./
-RUN npm install --frozen-lockfile
+RUN npm install 
 
 # Copiar el resto del código y construir
 COPY frontend/ ./
@@ -18,7 +18,7 @@ WORKDIR /src/app/backend
 
 # Copiar y verificar package.json
 COPY backend/package*.json ./
-RUN npm install --frozen-lockfile --omit=dev
+RUN npm install  --omit=dev
 
 # Copiar el código del backend
 COPY backend/ ./
