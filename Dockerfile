@@ -5,13 +5,10 @@ FROM node:18-alpine as frontend-builder
 WORKDIR /app/frontend
 
 # Copiar package.json y package-lock.json del frontend
-COPY frontend/package*.json ./
+COPY . .
 
 # Instalar dependencias del frontend
 RUN npm install
-
-# Copiar el resto del código del frontend
-COPY frontend/ ./
 
 # Construir el frontend
 RUN npm run build
@@ -23,7 +20,7 @@ FROM node:18-alpine
 WORKDIR /app/backend
 
 # Copiar package.json y package-lock.json del backend
-COPY backend/package*.json ./
+COPY . .
 
 # Instalar dependencias del backend
 RUN npm install 
