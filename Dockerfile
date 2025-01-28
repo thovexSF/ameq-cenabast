@@ -1,39 +1,24 @@
 # Etapa de construcción del frontend
-FROM node:18-alpine as frontend-builder
-
-WORKDIR /src/app/frontend
-
-# Copiar y verificar package.json
-COPY frontend/package*.json ./
-RUN npm install 
-
-# Copiar el resto del código y construir
-COPY frontend/ ./
-RUN npm run build
-
-# Etapa de construcción del backend
-FROM node:18-alpine as backend-builder
-
-WORKDIR /src/app/backend
-
-# Copiar y verificar package.json
-COPY backend/package*.json ./
-RUN npm install  --omit=dev
-
-# Copiar el código del backend
-COPY backend/ ./
-
-# Etapa final: Combinar frontend y backend
-FROM node:18-alpine
+FROM node:18-alpine as builder
 
 WORKDIR /app
 
-# Copiar el backend
-COPY --from=backend-builder /app ./
+# Copiar todo el código fuente
+COPY . .
 
-# Copiar el build del frontend
-COPY --from=frontend-builder /app/frontend/build ./public
+# Instalar dependencias y construir frontend
+RUN cd frontend && \
+    npm install && \
+    npm run build
 
+# Instalar dependencias de producción del backend
+RUN cd backend && \
+    npm install --omit=dev && \
+    mkdir -p public && \
+    cp -r ../frontend/build/* public/
+
+# Configurar para producción
+WORKDIR /app/backend
 ENV PORT=3002
 ENV NODE_ENV=production
 
