@@ -1,5 +1,5 @@
 # Etapa de construcción del frontend
-FROM node:18-alpine as frontend-builder
+FROM node:19.5.0-alpine as frontend-builder
 
 WORKDIR /app/frontend
 
