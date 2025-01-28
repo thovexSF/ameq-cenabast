@@ -6,6 +6,5 @@ node_modules
 npm-debug.log*
 .DS_Store
 README.md
-frontend/src
 frontend/node_modules
 backend/node_modules 
