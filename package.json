@@ -4,15 +4,11 @@
   "private": true,
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd backend && npm install --omit=dev && cd ../frontend && npm install --omit=dev && npm run build",
+    "build": "cd backend && npm install --omit=dev",
     "dev": "cd backend && npm run dev"
   },
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
-  },
-  "cacheDirectories": [
-    "backend/node_modules",
-    "frontend/node_modules"
-  ]
+  }
 } 
