@@ -6,22 +6,24 @@ RUN apk add --no-cache python3 make g++
 # Configurar directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json primero para aprovechar el cache de Docker
+# Copiar todos los archivos de configuración primero
 COPY package*.json ./
 COPY frontend/package*.json ./frontend/
 COPY backend/package*.json ./backend/
 
-# Instalar dependencias
-RUN npm run install-all
+# Instalar dependencias del backend
+RUN cd backend && npm install --production
+
+# Instalar dependencias del frontend
+RUN cd frontend && npm install
 
 # Copiar el resto de los archivos
 COPY . .
 
 # Construir el frontend
-RUN cd frontend && npm run build
-
-# Preparar el backend
-RUN cd backend && \
+RUN cd frontend && \
+    npm run build && \
+    cd ../backend && \
     mkdir -p public && \
     cp -r ../frontend/build/* public/
 
