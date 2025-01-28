@@ -1,5 +1,5 @@
 # Etapa de construcción del frontend
-FROM node:18-alpine as frontend-builder
+FROM node:19-alpine as frontend-builder
 
 WORKDIR /app/frontend
 
@@ -12,7 +12,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Etapa final con el backend
-FROM node:18-alpine
+FROM node:19-alpine
 
 WORKDIR /app/backend
 
