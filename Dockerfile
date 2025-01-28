@@ -1,42 +1,27 @@
-# Etapa de construcción del frontend
-FROM node:18-alpine as frontend-builder
-
-# Configurar directorio de trabajo
-WORKDIR /frontend-build
-
-# Copiar solo los archivos necesarios para instalar dependencias
-COPY frontend/package*.json ./
-
-# Instalar dependencias del frontend
-RUN npm install
-
-# Copiar el resto de los archivos del frontend
-COPY frontend/ ./
-
-# Construir el frontend
-RUN npm run build
-
-# Etapa final con el backend
 FROM node:18-alpine
 
 # Configurar directorio de trabajo
 WORKDIR /app
 
-# Copiar solo los archivos necesarios para instalar dependencias
-COPY backend/package*.json ./
+# Copiar todo el proyecto
+COPY . .
+
+# Instalar dependencias y construir frontend
+RUN cd frontend && \
+    npm install && \
+    npm run build
 
 # Instalar dependencias de producción del backend
-RUN npm install --omit=dev
-
-# Copiar el resto de los archivos del backend
-COPY backend/ ./
-
-# Crear directorio public y copiar build del frontend
-RUN mkdir -p public
-COPY --from=frontend-builder /frontend-build/build ./public
+RUN cd backend && \
+    npm install --omit=dev && \
+    mkdir -p public && \
+    cp -r ../frontend/build/* public/
 
 # Puerto
 EXPOSE 3002
+
+# Establecer directorio de trabajo final
+WORKDIR /app/backend
 
 # Comando para iniciar
 CMD ["npm", "start"]
