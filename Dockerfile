@@ -3,7 +3,7 @@ FROM node:18-alpine as frontend-builder
 
 # Configurar directorio de trabajo para el frontend
 WORKDIR /app/frontend
-
+RUN ls -la /app
 # Copiar package.json y package-lock.json del frontend
 COPY frontend/package*.json ./
 RUN npm install
