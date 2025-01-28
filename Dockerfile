@@ -1,19 +1,16 @@
 # Etapa de construcción del frontend
 FROM node:18-alpine as frontend-builder
 
-# Instalar dependencias necesarias
-RUN apk add --no-cache python3 make g++
-
 # Configurar directorio de trabajo
-WORKDIR /app/frontend
+WORKDIR /frontend-build
 
-# Copiar package.json y package-lock.json del frontend
+# Copiar solo los archivos necesarios para instalar dependencias
 COPY frontend/package*.json ./
 
 # Instalar dependencias del frontend
 RUN npm install
 
-# Copiar archivos del frontend
+# Copiar el resto de los archivos del frontend
 COPY frontend/ ./
 
 # Construir el frontend
@@ -22,24 +19,21 @@ RUN npm run build
 # Etapa final con el backend
 FROM node:18-alpine
 
-# Instalar dependencias necesarias
-RUN apk add --no-cache python3 make g++
-
 # Configurar directorio de trabajo
-WORKDIR /app/backend
+WORKDIR /app
 
-# Copiar package.json y package-lock.json del backend
+# Copiar solo los archivos necesarios para instalar dependencias
 COPY backend/package*.json ./
 
 # Instalar dependencias de producción del backend
 RUN npm install --omit=dev
 
-# Copiar archivos del backend
+# Copiar el resto de los archivos del backend
 COPY backend/ ./
 
 # Crear directorio public y copiar build del frontend
 RUN mkdir -p public
-COPY --from=frontend-builder /app/frontend/build ./public
+COPY --from=frontend-builder /frontend-build/build ./public
 
 # Puerto
 EXPOSE 3002
