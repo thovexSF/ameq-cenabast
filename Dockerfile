@@ -1,8 +1,5 @@
 FROM node:18-alpine
 
-# Instalar dependencias necesarias
-RUN apk add --no-cache python3 make g++
-
 # Configurar directorio de trabajo
 WORKDIR /app
 
