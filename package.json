@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd backend && npm ci --omit=dev && cd ../frontend && npm ci --omit=dev && npm run build",
+    "build": "cd backend && npm install --omit=dev && cd ../frontend && npm install --omit=dev && npm run build",
     "dev": "cd backend && npm run dev"
   },
   "engines": {
