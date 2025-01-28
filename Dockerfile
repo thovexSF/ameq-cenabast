@@ -1,3 +1,20 @@
+# Etapa de construcción del frontend
+FROM node:18-alpine as frontend-builder
+
+# Configurar directorio de trabajo para el frontend
+WORKDIR /app/frontend
+
+# Copiar package.json del frontend e instalar dependencias
+COPY frontend/package*.json ./
+RUN npm install
+
+# Copiar código fuente del frontend
+COPY frontend/ ./
+
+# Construir el frontend
+RUN npm run build
+
+# Etapa del backend
 FROM node:18-alpine
 
 # Configurar directorio de trabajo
@@ -9,6 +26,9 @@ RUN npm install --omit=dev
 
 # Copiar el código del backend
 COPY backend/ ./
+
+# Copiar el build del frontend al directorio public del backend
+COPY --from=frontend-builder /app/frontend/build ./public
 
 # Variables de entorno por defecto
 ENV PORT=3002
