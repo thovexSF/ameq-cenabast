@@ -6,6 +6,11 @@ echo "Current directory: $(pwd)"
 # Construir el frontend
 echo "Building frontend..."
 cd frontend
+echo "Frontend directory contents:"
+ls -la
+echo "Frontend package.json contents:"
+cat package.json
+
 npm install
 CI=false npm run build
 
