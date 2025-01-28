@@ -2,16 +2,20 @@
   "name": "ameq-cenabast",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
-    "dev": "cd backend && npm run dev"
+    "install-backend": "cd backend && npm install --production",
+    "install-frontend": "cd frontend && npm install --production",
+    "build-frontend": "cd frontend && npm run build",
+    "postinstall": "npm run install-backend && npm run install-frontend",
+    "build": "npm run build-frontend"
   },
   "engines": {
-    "node": ">=14.0.0"
-  }
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "cacheDirectories": [
+    "backend/node_modules",
+    "frontend/node_modules"
+  ]
 } 
