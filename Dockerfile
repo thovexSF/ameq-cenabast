@@ -2,7 +2,7 @@
 FROM node:18-alpine as frontend-builder
 
 # Configurar el directorio de trabajo del frontend
-WORKDIR /frontend
+WORKDIR /app/frontend
 
 # Copiar package.json y package-lock.json del frontend
 COPY frontend/package*.json ./
@@ -20,7 +20,7 @@ RUN npm run build
 FROM node:18-alpine
 
 # Configurar el directorio de trabajo del backend
-WORKDIR /backend
+WORKDIR /app/backend
 
 # Copiar package.json y package-lock.json del backend
 COPY backend/package*.json ./
