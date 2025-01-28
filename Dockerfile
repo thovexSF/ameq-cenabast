@@ -1,11 +1,16 @@
 # Etapa de construcción del frontend
-FROM node:18-alpine as builder
+FROM node:18 as builder
 
 # Configurar directorio de trabajo
 WORKDIR /app
 
 # Copiar package.json de ambos proyectos
-COPY package*.json ./
+COPY package.json package-lock.json ./
+
+# Instalar dependencias en la raíz
+RUN npm install
+
+# Copiar package.json de ambos proyectos
 COPY frontend/package*.json frontend/
 COPY backend/package*.json backend/
 
@@ -20,9 +25,9 @@ COPY . .
 RUN cd frontend && npm run build
 
 # Etapa final
-FROM node:18-alpine
+FROM node-18
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copiar package.json e instalar dependencias de producción
 COPY backend/package*.json ./
