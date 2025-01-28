@@ -3,25 +3,15 @@ FROM node:18-alpine
 # Configurar directorio de trabajo
 WORKDIR /app
 
-# Copiar todo el proyecto
-COPY . .
-
-# Instalar dependencias y construir frontend
-RUN cd frontend && \
-    npm install && \
-    npm run build
+# Copiar archivos del backend
+COPY backend/package*.json ./
+COPY backend/ ./
 
 # Instalar dependencias de producción del backend
-RUN cd backend && \
-    npm install --omit=dev && \
-    mkdir -p public && \
-    cp -r ../frontend/build/* public/
+RUN npm install --omit=dev
 
 # Puerto
 EXPOSE 3002
-
-# Establecer directorio de trabajo final
-WORKDIR /app/backend
 
 # Comando para iniciar
 CMD ["npm", "start"]
