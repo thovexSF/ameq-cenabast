@@ -27,7 +27,8 @@ RUN npm install --omit=dev
 # Copiar el código del backend
 COPY backend/ ./
 
-# Copiar el build del frontend al directorio public del backend
+# Crear directorio public y copiar el build del frontend
+RUN mkdir -p public
 COPY --from=frontend-builder /app/frontend/build ./public
 
 # Variables de entorno por defecto
