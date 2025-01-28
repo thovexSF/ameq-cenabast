@@ -2,7 +2,7 @@
 FROM node:18-alpine as builder
 
 # Configurar directorio de trabajo
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copiar package.json de ambos proyectos
 COPY package.json package-lock.json ./
@@ -25,7 +25,7 @@ COPY . .
 RUN cd frontend && npm run build
 
 # Etapa final
-FROM node-18-alpine
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
