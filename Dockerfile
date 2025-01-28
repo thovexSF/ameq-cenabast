@@ -5,7 +5,7 @@ FROM node:18-alpine as frontend-builder
 WORKDIR /app/frontend
 
 # Copiar package.json del frontend e instalar dependencias
-COPY frontend/package.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
 
 # Copiar código fuente del frontend
