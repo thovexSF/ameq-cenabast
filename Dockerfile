@@ -1,38 +1,45 @@
 # Etapa de construcción del frontend
-FROM node:19-alpine as frontend-builder
+FROM node:18-alpine as builder
 
-WORKDIR /app/frontend
+# Configurar directorio de trabajo
+WORKDIR /usr/src/app
 
-# Copiar e instalar dependencias del frontend
-COPY frontend/package*.json ./
+# Copiar package.json de ambos proyectos
+COPY package*.json ./
+COPY frontend/package*.json frontend/
+COPY backend/package*.json backend/
+
+# Instalar dependencias
 RUN npm install
+RUN cd frontend && npm install
 
-# Copiar y construir el frontend
-COPY frontend/ ./
-RUN npm run build
+# Copiar el código fuente
+COPY . .
 
-# Etapa final con el backend
-FROM node:19-alpine
+# Construir el frontend
+RUN cd frontend && npm run build
 
-WORKDIR /app/backend
+# Etapa final
+FROM node:18-alpine
 
-# Copiar e instalar dependencias del backend
+WORKDIR /usr/src/app
+
+# Copiar package.json e instalar dependencias de producción
 COPY backend/package*.json ./
 RUN npm install --omit=dev
 
-# Copiar archivos del backend
+# Copiar el código del backend
 COPY backend/ ./
 
-# Crear directorio public y copiar build del frontend
-RUN mkdir -p public
-COPY --from=frontend-builder /app/frontend/build ./public
+# Copiar el build del frontend
+COPY --from=builder /usr/src/app/frontend/build ./public
 
-# Variables de entorno por defecto
-ENV PORT=3002
+# Variables de entorno
 ENV NODE_ENV=production
+ENV PORT=3002
 
-# Puerto
+# Exponer puerto
 EXPOSE 3002
 
-# Comando para iniciar
+# Iniciar la aplicación
 CMD ["npm", "start"]
