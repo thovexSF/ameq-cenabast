@@ -3,14 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install": "cd backend && npm install && cd ../frontend && npm install",
-    "build": "npm run build:frontend && npm run start",
-    "build:frontend": "cd frontend && npm run build",
-    "start": "cd backend && npm start"
+    "start": "cd backend && npm start",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "postbuild": "mkdir -p backend/public && cp -r frontend/build/* backend/public/"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.0"
-  },
+  
   "engines": {
     "node": ">=18.0.0"
   }
