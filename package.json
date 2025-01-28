@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd frontend && npm run build",
-    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\""
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "heroku-postbuild": "cd frontend && npm install && npm run build && cd ../backend && npm install --only=production"
   },
   "devDependencies": {
     "concurrently": "^8.2.0"
