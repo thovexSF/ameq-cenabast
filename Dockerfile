@@ -2,7 +2,7 @@
 FROM node:18-alpine as builder
 
 # Configurar directorio de trabajo
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copiar package.json de ambos proyectos
 COPY package*.json ./
