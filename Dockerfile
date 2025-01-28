@@ -1,31 +1,33 @@
 # Etapa de construcción del frontend
-FROM node:19.5.0-alpine as frontend-builder
+FROM node:18-alpine as frontend-builder
 
+# Configurar directorio de trabajo para el frontend
 WORKDIR /app/frontend
 
-# Copiar e instalar dependencias del frontend
+# Copiar package.json del frontend e instalar dependencias
 COPY frontend/package*.json ./
-RUN apk update && apk add npm
 RUN npm install
 
-# Copiar y construir el frontend
+# Copiar código fuente del frontend
 COPY frontend/ ./
+
+# Construir el frontend
 RUN npm run build
 
 # Etapa final con el backend
 FROM node:18-alpine
 
-WORKDIR /app/backend
+# Configurar directorio de trabajo
+WORKDIR /app
 
-# Copiar e instalar dependencias del backend
+# Copiar package.json del backend e instalar dependencias
 COPY backend/package*.json ./
 RUN npm install --omit=dev
 
-# Copiar archivos del backend
+# Copiar el código del backend
 COPY backend/ ./
 
-# Crear directorio public y copiar build del frontend
-RUN mkdir -p public
+# Copiar el build del frontend desde la etapa anterior
 COPY --from=frontend-builder /app/frontend/build ./public
 
 # Variables de entorno por defecto
