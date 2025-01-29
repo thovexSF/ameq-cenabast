@@ -1,5 +1,5 @@
 # Etapa 1: Construcción del frontend
-FROM node:16 as frontend-builder
+FROM node:18 as frontend-builder
 
 WORKDIR /app/frontend
 
@@ -12,7 +12,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Etapa 2: Configuración del backend y producción
-FROM node:16 as backend
+FROM node:18 as backend
 
 WORKDIR /app/backend
 
