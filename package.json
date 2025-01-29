@@ -1,19 +1,17 @@
 {
-  "name": "ameq-app",
+  "name": "ameq-cenabast",
   "version": "1.0.0",
   "private": true,
-  "main": "index.js",
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "description": "Sistema de integración AMEQ-Cenabast",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cd backend && npm start",
-    "install": "cd frontend && npm install --legacy-peer-deps && cd ../backend && npm install",
-    "build": "cd frontend && npm run build && cd ../backend && mkdir -p public && cp -r ../frontend/build/* ./public/",
-    "postinstall": "npm run build"
+    "build": "cd frontend && npm run build",
+    "postinstall": "cd frontend && npm install --omit=dev && cd ../backend && npm install --omit=dev"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.0"
   }
 }
