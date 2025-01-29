@@ -1,5 +1,5 @@
 {
-  "name": "ameq-cenabast",
+  "name": "app",
   "version": "1.0.0",
   "private": true,
   "main": "index.js",
@@ -9,9 +9,7 @@
   "scripts": {
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start",
-    "frontend-install": "npm install --prefix frontend",
-    "frontend-build": "npm run build --prefix frontend"
+    "start:frontend": "cd frontend && npm start"
   },
   "devDependencies": {
     "concurrently": "^6.2.0"
