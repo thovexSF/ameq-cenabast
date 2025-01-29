@@ -1,41 +1,39 @@
-# Etapa 1: Construcción del frontend
-FROM node:16 as build-stage
+# Etapa de construcción del frontend
+FROM node:18-alpine as frontend-builder
 
-WORKDIR /app
+# Configurar directorio de trabajo para el frontend
+WORKDIR /app/frontend
 
-# Copia los archivos de configuración del proyecto
-COPY package.json package-lock.json ./
-
-# Instala las dependencias del servidor
+# Copiar package.json del frontend e instalar dependencias
+COPY frontend/package*.json ./
 RUN npm install
 
-# Copia los archivos del frontend y sus dependencias
-COPY frontend/package.json frontend/package-lock.json ./frontend/
-RUN npm install --prefix frontend
+# Copiar código fuente del frontend y construir
+COPY frontend/ ./
+RUN npm run build
 
-# Copia el resto de los archivos del proyecto
-COPY . .
+# Etapa del backend
+FROM node:18-alpine
 
-# Construye el frontend
-RUN npm run frontend-build
-
-# Etapa 2: Configuración de producción
-FROM node:16 as production-stage
-
+# Configurar directorio de trabajo
 WORKDIR /app
 
-# Copia los archivos de configuración del proyecto
-COPY package.json package-lock.json ./
+# Copiar package.json del backend e instalar dependencias de producción
+COPY backend/package*.json ./
+RUN npm install --omit=dev
 
-# Instala las dependencias del servidor
-RUN npm install --only=production
+# Copiar el código del backend
+COPY backend/ ./
 
-# Copia el servidor y los archivos estáticos construidos
-COPY --from=build-stage /app/frontend/build ./frontend/build
-COPY . .
+# Copiar el build del frontend a public
+COPY --from=frontend-builder /app/frontend/build ./public
 
-# Expone el puerto
-EXPOSE 3000
+# Variables de entorno
+ENV NODE_ENV=production
+ENV PORT=3002
 
-# Comando para ejecutar el servidor
+# Puerto
+EXPOSE 3002
+
+# Comando para iniciar
 CMD ["node", "server.js"]
