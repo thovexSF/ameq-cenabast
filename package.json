@@ -6,9 +6,9 @@
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm start",
-    "frontend-install": "npm install --prefix client",
-    "frontend-build": "npm run build --prefix client",
-    "build": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "frontend-install": "npm install --prefix frontend",
+    "frontend-build": "npm run build --prefix frontend",
+    "build": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
   },
   "devDependencies": {
     "concurrently": "^6.2.0"
