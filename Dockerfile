@@ -4,7 +4,7 @@ FROM node:18 as frontend-builder
 WORKDIR /app/frontend
 
 # Copiar archivos del frontend
-COPY frontend/package.json frontend/package-lock.json ./
+COPY frontend/package.json ./
 RUN npm install
 
 # Copiar el resto del frontend y construirlo
@@ -17,7 +17,7 @@ FROM node:18 as backend
 WORKDIR /app/backend
 
 # Copiar archivos del backend
-COPY backend/package.json backend/package-lock.json ./
+COPY backend/package.json ./
 RUN npm install --only=production
 
 # Copiar el código fuente del backend
