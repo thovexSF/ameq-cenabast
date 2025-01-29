@@ -2,15 +2,18 @@
 FROM node:18-alpine as frontend-builder
 
 # Configurar directorio de trabajo para el frontend
-WORKDIR /app/frontend
+WORKDIR /app
 
 # Copiar package.json del frontend e instalar dependencias
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm install
 
 # Copiar código fuente del frontend y construir
-COPY frontend/ ./
-RUN npm run build
+COPY frontend/package.json ./
+RUN npm install --prefix client
+
+COPY . .
+RUN npm run frontend-build
 
 # Etapa del backend
 FROM node:18-alpine
@@ -19,19 +22,13 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copiar package.json del backend e instalar dependencias de producción
-COPY backend/package*.json ./
-RUN npm install --omit=dev
-
-# Copiar el código del backend
-COPY backend/ ./
+COPY package.json package-lock.json ./
+RUN npm install --only=production
 
 # Copiar el build del frontend a public
-COPY --from=frontend-builder /app/frontend/build ./public
+COPY --from=frontend-builder /app/frontend/build ./frontend/build
 
-# Variables de entorno
-ENV NODE_ENV=production
-ENV PORT=3002
-
+COPY . .
 # Puerto
 EXPOSE 3002
 
