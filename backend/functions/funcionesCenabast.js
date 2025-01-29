@@ -49,10 +49,14 @@ async function informarGuiaDespacho(detalleGuia, token) {
 // Función para verificar movimientos existentes
 async function verificarMovimientosExistentes(docCenabast) {
     try {
+        console.log(`Verificando movimientos para Doc_Cenabast: ${docCenabast}`);
+        
         const response = await axios.get(`${BASEURL}/public/distribucion/${docCenabast}/movimiento`);
+        console.log('Respuesta de verificación:', response.data);
         
         // Verificar si no hay movimientos
         if (!response.data || response.data.length === 0) {
+            console.log(`No se encontraron movimientos para ${docCenabast}`);
             throw new Error(`El Doc_Cenabast ${docCenabast} no existe en el sistema Cenabast`);
         }
 
@@ -60,22 +64,35 @@ async function verificarMovimientosExistentes(docCenabast) {
         const movimientosEntrega = response.data.filter(mov => mov.DescMovimiento === 1);
         
         if (movimientosEntrega.length > 0) {
+            console.log(`Ya existe movimiento de entrega para ${docCenabast}:`, movimientosEntrega);
             throw new Error(`Ya existe un movimiento de entrega para el documento ${docCenabast}`);
         }
         
+        console.log(`Verificación exitosa para ${docCenabast}`);
         return true;
     } catch (error) {
+        console.error('Error en verificarMovimientosExistentes:', {
+            docCenabast,
+            error: error.message,
+            response: error.response?.data
+        });
+
         // Si el error ya tiene un mensaje personalizado, lo propagamos
         if (error.message.includes('no existe en el sistema') || 
             error.message.includes('Ya existe un movimiento')) {
             throw error;
         }
+        
         // Si es un error de la API (404, etc), lanzamos el error personalizado
         if (error.response?.status === 404) {
             throw new Error(`El Doc_Cenabast ${docCenabast} no existe en el sistema Cenabast`);
         }
+        
         // Para otros errores de la API
-        throw new Error(error.response?.data?.Message || `Error al verificar movimientos para el documento ${docCenabast}`);
+        throw new Error(
+            error.response?.data?.Message || 
+            `Error al verificar movimientos para el documento ${docCenabast}`
+        );
     }
 }
 
@@ -83,32 +100,29 @@ async function verificarMovimientosExistentes(docCenabast) {
 async function informarFechaEntrega(docCenabast, movimiento, token) {
     try {
         // Primero verificamos si ya existe un movimiento
-        try {
-            await verificarMovimientosExistentes(docCenabast);
-        } catch (error) {
-            // Si es un error de verificación, lo propagamos inmediatamente
-            throw error;
-        }
+        console.log(`Iniciando verificación para ${docCenabast}`);
+        await verificarMovimientosExistentes(docCenabast);
 
-        // Si la verificación fue exitosa, procedemos con el POST
-        try {
-            const response = await axios.post(
-                `${BASEURL}/proveedor/distribucion/${docCenabast}/movimiento`,
-                movimiento,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+        console.log('Verificación exitosa, procediendo con el POST');
+        const response = await axios.post(
+            `${BASEURL}/proveedor/distribucion/${docCenabast}/movimiento`,
+            movimiento,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            );
-            console.log('Movimiento modificado:', response.data);
-            return response.data;
-        } catch (error) {
-            // Si hay error en el POST, lanzamos un error específico
-            throw new Error(error.response?.data?.Message || 'Error al crear el movimiento de entrega');
-        }
+            }
+        );
+        
+        console.log('Movimiento creado:', response.data);
+        return response.data;
     } catch (error) {
+        console.error('Error en informarFechaEntrega:', {
+            docCenabast,
+            movimiento,
+            error: error.message
+        });
         throw error;
     }
 }
