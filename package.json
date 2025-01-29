@@ -11,7 +11,7 @@
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm start",
     "frontend-install": "npm install --prefix frontend",
-    "frontend-build": "npm run build --prefix frontend",
+    "frontend-build": "npm run build --prefix frontend"
   },
   "devDependencies": {
     "concurrently": "^6.2.0"
