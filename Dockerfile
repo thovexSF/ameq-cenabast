@@ -1,36 +1,33 @@
-# Etapa de construcción del frontend
-FROM node:18-alpine as frontend-builder
+# Etapa 1: Construcción del frontend
+FROM node:16 as frontend-builder
 
-# Configurar directorio de trabajo para el frontend
-WORKDIR /app
+WORKDIR /app/frontend
 
-# Copiar package.json del frontend e instalar dependencias
-COPY package*.json ./
+# Copiar archivos del frontend
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
 
-# Copiar código fuente del frontend y construir
-COPY frontend/package.json ./
-RUN npm install --prefix client
+# Copiar el resto del frontend y construirlo
+COPY frontend/ ./
+RUN npm run build
 
-COPY . .
-RUN npm run frontend-build
+# Etapa 2: Configuración del backend y producción
+FROM node:16 as backend
 
-# Etapa del backend
-FROM node:18-alpine
+WORKDIR /app/backend
 
-# Configurar directorio de trabajo
-WORKDIR /app
-
-# Copiar package.json del backend e instalar dependencias de producción
-COPY package.json package-lock.json ./
+# Copiar archivos del backend
+COPY backend/package.json backend/package-lock.json ./
 RUN npm install --only=production
 
-# Copiar el build del frontend a public
-COPY --from=frontend-builder /app/frontend/build ./frontend/build
+# Copiar el código fuente del backend
+COPY backend/ ./
 
-COPY . .
-# Puerto
-EXPOSE 3002
+# Copiar los archivos del frontend generados en la etapa anterior
+COPY --from=frontend-builder /app/frontend/build ./public
 
-# Comando para iniciar
+# Exponer el puerto del backend
+EXPOSE 3000
+
+# Comando para ejecutar el backend
 CMD ["node", "server.js"]
