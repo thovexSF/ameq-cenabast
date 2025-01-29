@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:18 AS backend
 WORKDIR /app/backend
 COPY backend/package*.json ./
-RUN npm install --only=production
+RUN npm install --omit=dev
 COPY backend/ .
 COPY --from=frontend-builder /app/frontend/build ./public
 
